@@ -1,0 +1,8 @@
+breakfast -> protein ( "with" breakfast "on the side" )?
+           | bread ;
+
+protein -> "really"+ "crispy" "bacon"
+         | "sausage"
+         | ( "scrambled" | "poached" | "fried" ) "eggs" ;
+
+bread -> "toast" | "biscuits" | "English muffin" ;
