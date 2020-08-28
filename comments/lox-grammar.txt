@@ -1,8 +1,22 @@
+// unambiguous
+expression      -> equality ;
+equality        -> comparison ( ( "!=" | "==" ) comparison )* ;
+comparison      -> addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
+addition        -> multiplication ( ( "-" | "+" ) multiplication )* ;
+// correct, but not optimal for how it will be parsed
+// multiplication  -> multiplication ( "/" | "*" ) unary
+//                  | unary ;
+multiplication  -> unary ( ( "/" | "*" ) unary )* ;
+unary           -> ( "!" | "-" ) unary
+                 | primary ;
+primary         -> NUMBER | STRING | "false" | "true" | "nil"
+                 | "(" expression ")" ;
+
+// ambiguous
 expression -> literal
             | unary
             | binary
             | grouping ;
-
 literal  -> NUMBER | STRING | "true" | "false" | "nil" ;
 grouping -> "(" expression ")" ;
 unary    -> ( "-" | "!" ) expression ;
