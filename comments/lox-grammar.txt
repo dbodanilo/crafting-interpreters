@@ -1,5 +1,11 @@
 // unambiguous
-expression      -> equality ;
+// expression      -> equality ;
+// expression      -> sequence ;
+expression      -> ternary ;
+// added ternary operator
+ternary         -> sequence ( "?" ternary ":" ternary )*
+// added comma operator
+sequence        -> equality ( "," equality )* ;
 equality        -> comparison ( ( "!=" | "==" ) comparison )* ;
 comparison      -> addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 addition        -> multiplication ( ( "-" | "+" ) multiplication )* ;

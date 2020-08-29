@@ -14,8 +14,46 @@ class Parser {
         this.tokens = tokens;
     }
 
+    Expr parse() {
+        try {
+            return expression();
+        } catch (ParseError error) {
+            return null;
+        }
+    }
+
     private Expr expression() {
-        return equality();
+//        return equality();
+//        return sequence();
+        return ternary();
+    }
+
+    private Expr ternary() {
+        Expr expr = sequence();
+
+        // implement elvis operator? (a ?: b)
+        if(match(QUESTION)) {
+            Token left = previous();
+            Expr second = ternary();
+            consume(COLON, "Expect ':' after expression.");
+            Token right = previous();
+            Expr third = ternary();
+            expr = new Expr.Ternary(expr, left, second, right, third);
+        }
+
+        return expr;
+    }
+
+    private Expr sequence() {
+        Expr expr = equality();
+
+        while(match(COMMA)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
     }
 
     private Expr equality() {
@@ -91,7 +129,7 @@ class Parser {
             return new Expr.Grouping(expr);
         }
 
-        return null;
+        throw error(peek(), "Expect expression.");
     }
 
     private Token consume(TokenType type, String message) {
@@ -103,6 +141,28 @@ class Parser {
     private ParseError error(Token token, String message) {
         Lox.error(token, message);
         return new ParseError();
+    }
+
+    private void sincronize() {
+        advance();
+
+        while(!isAtEnd()) {
+            if(previous().type == SEMICOLON) return;
+
+            switch(peek().type) {
+                case CLASS:
+                case FUN:
+                case VAR:
+                case FOR:
+                case IF:
+                case WHILE:
+                case PRINT:
+                case RETURN:
+                    return;
+            }
+
+            advance();
+        }
     }
 
     private boolean match(TokenType... types) {
