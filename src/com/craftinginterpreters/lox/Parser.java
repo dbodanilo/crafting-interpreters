@@ -129,6 +129,19 @@ class Parser {
             return new Expr.Grouping(expr);
         }
 
+        // Binary operators used as unary
+        if(
+            match(SLASH, STAR,
+                MINUS, PLUS,
+                GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
+                BANG_EQUAL, EQUAL_EQUAL)
+        ) {
+            Token operator = previous();
+            if(expression() != null) {
+                throw error(operator, "Unary operation is not supported.");
+            }
+        }
+
         throw error(peek(), "Expect expression.");
     }
 
