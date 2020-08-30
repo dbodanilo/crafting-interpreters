@@ -1,0 +1,16 @@
+(?: (! true) (+ (- 10.0) 5.0) 5.0)
+
+bool :: a -> a -> Bool -> a
+bool (-10 + 5) 5 (!true) 
+
+typedef void* T;
+
+typedef T (*Const)();
+
+typedef char Bool;
+
+// general idea
+// { () -> x, () -> y }[p]()
+T ternary(Bool p, Const x, Const y) {
+    return {x, y}[p]();
+}
