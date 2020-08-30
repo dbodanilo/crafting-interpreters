@@ -1,22 +1,41 @@
 // unambiguous
-// expression      -> equality ;
-// expression      -> sequence ;
-expression      -> ternary ;
-// added ternary operator
+program         -> declaration* EOF ;
+declaration     -> varDecl
+                 | statement ;
+varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
+statement       -> exprStmt
+                 | printStmt
+                 | block ;
+block           -> "{" declaration* "}" ;
+exprStmt        -> expression ";" ;
+printStmt       -> "print" expression ";" ;
+
+// expression      -> equality ; (before the addition of the comma operator)
+// expression      -> sequence ; (before the addition of the ternary operator)
+// expression      -> ternary ;  (before the addition of the asignment expression)
+
+expression      -> assignment ;
+assignment      -> IDENTIFIER "=" assignment
+                 | ternary ;
+
 ternary         -> sequence ( "?" ternary ":" ternary )*
-// added comma operator
 sequence        -> equality ( "," equality )* ;
+
 equality        -> comparison ( ( "!=" | "==" ) comparison )* ;
 comparison      -> addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 addition        -> multiplication ( ( "-" | "+" ) multiplication )* ;
+
 // correct, but not optimal for how it will be parsed
 // multiplication  -> multiplication ( "/" | "*" ) unary
 //                  | unary ;
+
 multiplication  -> unary ( ( "/" | "*" ) unary )* ;
 unary           -> ( "!" | "-" ) unary
                  | primary ;
-primary         -> NUMBER | STRING | "false" | "true" | "nil"
-                 | "(" expression ")" ;
+primary         -> "true" | "false" | "nil"
+                 | NUMBER | STRING
+                 | "(" expression ")"
+                 | IDENTIFIER ;
 
 // ambiguous
 expression -> literal
