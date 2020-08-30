@@ -16,7 +16,10 @@ class Parser {
 
     Expr parse() {
         try {
-            return expression();
+            Expr expr = expression();
+            if(!match(SEMICOLON)) throw error(advance(), "Unexpected token after expression.");
+
+            return expr;
         } catch (ParseError error) {
             return null;
         }

@@ -10,7 +10,7 @@ public class GenerateAst {
         if(args.length != 1) {
             System.err.println("Usage: generate_ast <output directory>");
 
-            // <sysexits.h> EX_USAGE (64): The command was used incorrectly
+            // <sysexits.h> EX_USAGE (64): The command was used incorrectly.
             System.exit(64);
         }
 
