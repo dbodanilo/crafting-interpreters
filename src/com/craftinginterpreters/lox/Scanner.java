@@ -123,7 +123,7 @@ class Scanner {
             }
 
             if(peek() == '\n') ++line;
-            advance();
+            if(!isAtEnd()) advance();
         }
     }
 
