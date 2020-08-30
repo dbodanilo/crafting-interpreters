@@ -1,10 +1,24 @@
 package com.craftinginterpreters.lox;
 
-class Interpreter implements Expr.Visitor<Object> {
-    void interpret(Expr expression) {
+import java.util.List;
+
+class Interpreter
+    implements Expr.Visitor<Object>,
+        Stmt.Visitor<Void> {
+    private Environment environment = new Environment();
+
+    private Boolean showExpr;
+    private final Object unassigned = new Object();
+
+    // before inclusion of statements
+//    void interpret(Expr expression) {
+    void interpret(List<Stmt> statements, Boolean showExpr) {
         try {
-            Object value = evaluate(expression);
-            System.out.println(stringify(value));
+            this.showExpr = showExpr;
+
+            for(Stmt statement : statements) {
+                execute(statement);
+            }
         } catch(RuntimeError error) {
             Lox.runtimeError(error);
         }
@@ -14,52 +28,72 @@ class Interpreter implements Expr.Visitor<Object> {
         return expr.accept(this);
     }
 
-    private Boolean isTruthy(Object object) {
-        if(object == null) return false;
-        if(object instanceof Boolean) return (Boolean)object;
-        return true;
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 
-    private Boolean isEqual(Object a, Object b) {
-        // nil is only equal to nil
-        if(a == null && b == null) return true;
-        if(a == null) return false;
+    private void executeBlock(List<Stmt> statements, Environment environment) {
+        Environment previous = this.environment;
+        try {
+            this.environment = environment;
 
-        return a.equals(b);
-    }
-
-    private void checkNumberOperand(Token operator, Object operand) {
-        if(operand instanceof Double) return;
-        throw new RuntimeError(operator, "Operand must be a number.");
-    }
-
-    private void checkNumberOperands(Token operator,
-                                     Object left, Object right) {
-        if(left instanceof Double && right instanceof Double)
-        {
-            if(operator.type == TokenType.SLASH &&
-               (double)right == 0) {
-                throw new RuntimeError(operator, "Denominator must be non-zero.");
+            for(Stmt statement : statements) {
+                execute(statement);
             }
-            return;
+        } finally {
+            this.environment = previous;
+        }
+    }
+
+    @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        Object value = unassigned;
+        if(stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
         }
 
-        throw new RuntimeError(operator, "Operands must be numbers.");
+        environment.define(stmt.name.lexeme, value);
+        return null;
     }
 
-    private String stringify(Object object) {
-        if(object == null) return "nil";
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        Object exprVal =  evaluate(stmt.expression);
 
-        // Hack. Work around Java adding ".0" to integer-valued doubles.
-        if(object instanceof Double) {
-            String text = object.toString();
-            if(text.endsWith(".0")) {
-                text = text.substring(0, text.length() - 2);
-            }
-            return text;
-        }
+        // so it does not print when running from file;
+        if(showExpr) System.out.println(stringify(exprVal));
 
-        return object.toString();
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.expression);
+        System.out.println(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
+
+        environment.assign(expr.name, value);
+        return value;
+    }
+
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+        Object val = environment.get(expr.name);
+        if(!val.equals(unassigned)) return val;
+
+        throw new RuntimeError(expr.name,
+        "Use of variable before assignment.");
     }
 
     @Override
@@ -149,5 +183,53 @@ class Interpreter implements Expr.Visitor<Object> {
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
         return expr.value;
+    }
+
+    private Boolean isTruthy(Object object) {
+        if(object == null) return false;
+        if(object instanceof Boolean) return (Boolean)object;
+        return true;
+    }
+
+    private Boolean isEqual(Object a, Object b) {
+        // nil is only equal to nil
+        if(a == null && b == null) return true;
+        if(a == null) return false;
+
+        return a.equals(b);
+    }
+
+    private void checkNumberOperand(Token operator, Object operand) {
+        if(operand instanceof Double) return;
+        throw new RuntimeError(operator, "Operand must be a number.");
+    }
+
+    private void checkNumberOperands(Token operator,
+                                     Object left, Object right) {
+        if(left instanceof Double && right instanceof Double)
+        {
+            if(operator.type == TokenType.SLASH &&
+                    (double)right == 0) {
+                throw new RuntimeError(operator, "Denominator must be non-zero.");
+            }
+            return;
+        }
+
+        throw new RuntimeError(operator, "Operands must be numbers.");
+    }
+
+    private String stringify(Object object) {
+        if(object == null) return "nil";
+
+        // Hack. Work around Java adding ".0" to integer-valued doubles.
+        if(object instanceof Double) {
+            String text = object.toString();
+            if(text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
+            }
+            return text;
+        }
+
+        return object.toString();
     }
 }
