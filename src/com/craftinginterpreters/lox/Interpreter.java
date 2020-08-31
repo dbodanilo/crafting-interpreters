@@ -67,7 +67,10 @@ class Interpreter
         Object exprVal =  evaluate(stmt.expression);
 
         // so it does not print when running from file;
-        if(showExpr) System.out.println(stringify(exprVal));
+        if(showExpr) {
+//            System.out.println(new AstPrinter().print(stmt.expression));
+            System.out.println(stringify(exprVal));
+        }
 
         return null;
     }
@@ -204,8 +207,7 @@ class Interpreter
         throw new RuntimeError(operator, "Operand must be a number.");
     }
 
-    private void checkNumberOperands(Token operator,
-                                     Object left, Object right) {
+    private void checkNumberOperands(Token operator, Object left, Object right) {
         if(left instanceof Double && right instanceof Double)
         {
             if(operator.type == TokenType.SLASH &&

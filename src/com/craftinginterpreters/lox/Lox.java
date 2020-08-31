@@ -53,23 +53,27 @@ public class Lox {
 
             // Ctrl + D signals EOF and readLine() returns null
             if (line == null) break;
-            run(line);
+            run(line, true);
             hadError = false;
         }
     }
 
     private static void run(String source) {
+        run(source, false);
+    }
+
+    private static void run(String source, Boolean showExpr) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
         Parser parser = new Parser(tokens);
-        Expr expression = parser.parse();
+        List<Stmt> statements = parser.parse();
 
         // Stop if there was a syntax error.
         if(hadError) return;
 
 //        System.out.println(new AstPrinter().print(expression));
-        interpreter.interpret(expression);
+        interpreter.interpret(statements, showExpr);
     }
 
     static void error(int line, String message) {
