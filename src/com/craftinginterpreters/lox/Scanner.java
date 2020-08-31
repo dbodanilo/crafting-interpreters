@@ -117,9 +117,9 @@ class Scanner {
                 advance();
                 blockComment();
             }
-            else if(match('*') && peek() == '/') {
+            if(match('*') && peek() == '/') {
                 advance();
-                break;
+                return;
             }
 
             if(peek() == '\n') ++line;

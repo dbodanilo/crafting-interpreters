@@ -65,7 +65,7 @@ class Parser {
             statements.add(declaration());
         }
 
-        consume(RIGHT_BRACE, "Expect '}' after block.s");
+        consume(RIGHT_BRACE, "Expect '}' after block.");
         return statements;
     }
 
