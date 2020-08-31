@@ -69,7 +69,9 @@ class Interpreter
         // so it does not print when running from file;
         if(showExpr) {
 //            System.out.println(new AstPrinter().print(stmt.expression));
-            System.out.println(stringify(exprVal));
+            String text = stringify(exprVal);
+            if(exprVal instanceof String) text = "'" + text + "'";
+            System.out.println(text);
         }
 
         return null;
