@@ -7,15 +7,12 @@ class Interpreter
         Stmt.Visitor<Void> {
     private Environment environment = new Environment();
 
-    private Boolean showExpr;
     private final Object unassigned = new Object();
 
     // before inclusion of statements
 //    void interpret(Expr expression) {
-    void interpret(List<Stmt> statements, Boolean showExpr) {
+    void interpret(List<Stmt> statements) {
         try {
-            this.showExpr = showExpr;
-
             for(Stmt statement : statements) {
                 execute(statement);
             }
@@ -64,16 +61,13 @@ class Interpreter
 
     @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
-        Object exprVal =  evaluate(stmt.expression);
+//        Object exprVal =
+        evaluate(stmt.expression);
 
-        // so it does not print when running from file;
-        if(showExpr) {
-//            System.out.println(new AstPrinter().print(stmt.expression));
-            String text = stringify(exprVal);
-            if(exprVal instanceof String) text = "'" + text + "'";
-            System.out.println(text);
-        }
-
+        // should not print when running from file;
+//            String text = stringify(exprVal);
+//            if(exprVal instanceof String) text = "'" + text + "'";
+//            System.out.println(text);
         return null;
     }
 
