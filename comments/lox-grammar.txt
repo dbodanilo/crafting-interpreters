@@ -4,15 +4,19 @@ declaration     -> varDecl
                  | statement ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement       -> exprStmt
+                 | exitStmt
                  | forStmt
                  | ifStmt
                  | printStmt
                  | whileStmt
                  | block ;
+
+exitStmt       -> ( "break" | "continue" | "return" expression? ) ";" ;
+
 exprStmt        -> expression ";" ;
 forStmt         -> "for" "(" (varDecl | exprStmt | ";" )
                              expression? ";"
-                             expression? ")" statement ;s
+                             expression? ")" statement ;
 ifStmt          -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStmt       -> "print" expression ";" ;
 whileStmt       -> "while" "(" expression ")" statement ;

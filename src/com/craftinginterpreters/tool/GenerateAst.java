@@ -16,18 +16,23 @@ public class GenerateAst {
 
         String outputDir = args[0];
         defineAst(outputDir, "Expr", Arrays.asList(
-            "Ternary    : Expr first, Token left, Expr second, Token right, Expr third",
-            "Binary     : Expr left, Token operator, Expr right",
-            "Unary      : Token operator, Expr right",
             "Assign     : Token name, Expr value",
-            "Logical    : Expr left, Token operator, Expr right",
+            "Binary     : Expr left, Token operator, Expr right",
             "Grouping   : Expr expression",
-            "Variable   : Token name",
-            "Literal    : Object value"
+            "Literal    : Object value",
+            "Logical    : Expr left, Token operator, Expr right",
+
+            "Ternary    : Expr first, Token left, Expr second, Token right, Expr third",
+
+            "Unary      : Token operator, Expr right",
+            "Variable   : Token name"
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(
             "Block      : List<Stmt> statements",
+
+            "Exit       : Token operator, Expr value",
+
             "Expression : Expr expression",
             "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
             "Print      : Expr expression",

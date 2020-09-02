@@ -11,6 +11,7 @@ class Parser {
 
     private final List<Token> tokens;
     private int current = 0;
+    private int loopDepth = 0;
 
     Parser(List<Token> tokens) {
         this.tokens = tokens;
@@ -53,6 +54,11 @@ class Parser {
     }
 
     private Stmt statement() {
+        if(match(BREAK, CONTINUE)) {
+            if(loopDepth > 0) return exitStatement();
+            else throw error(previous(), "loop exit statement outside loop construct.");
+        }
+
         if(match(FOR)) return forStatement();
         if(match(IF)) return ifStatement();
         if(match(PRINT)) return printStatement();
@@ -60,6 +66,12 @@ class Parser {
         if(match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt exitStatement() {
+        Token keyword = previous();
+        consume(SEMICOLON, "Expect ';' after loop exit statement.");
+        return new Stmt.Exit(keyword, null);
     }
 
     private Stmt forStatement() {
@@ -86,7 +98,9 @@ class Parser {
         }
         consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
+        ++loopDepth;
         Stmt body = statement();
+        --loopDepth;
 
         if(increment != null) {
             body = new Stmt.Block(Arrays.asList(
@@ -130,7 +144,10 @@ class Parser {
         consume(LEFT_PAREN, "Expect '(' after 'while'.");
         Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after condition.");
+
+        ++loopDepth;
         Stmt body = statement();
+        --loopDepth;
 
         return new Stmt.While(condition, body);
     }
@@ -337,6 +354,9 @@ class Parser {
             if(previous().type == SEMICOLON) return;
 
             switch(peek().type) {
+                case BREAK:
+                case CONTINUE:
+
                 case CLASS:
                 case FUN:
                 case VAR:

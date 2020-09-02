@@ -19,6 +19,8 @@ enum TokenType {
     // Keywords
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
     PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
+    // Loop statements
+    BREAK, CONTINUE,
 
     EOF
 }

@@ -45,6 +45,29 @@ class Interpreter
     // Stmt.Visitor<Void>
 
     @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
+
+    @Override
+    public Void visitExitStmt(Stmt.Exit stmt) {
+        throw new RuntimeError(stmt.operator, "Loop exit issued out of loop construct.");
+    }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+//        Object exprVal =
+        evaluate(stmt.expression);
+
+        // should not print when running from file;
+//            String text = stringify(exprVal);
+//            if(exprVal instanceof String) text = "'" + text + "'";
+//            System.out.println(text);
+        return null;
+    }
+
+    @Override
     public Void visitIfStmt(Stmt.If stmt) {
         if(isTruthy(evaluate(stmt.condition))) {
             execute(stmt.thenBranch);
@@ -63,20 +86,6 @@ class Interpreter
     }
 
     @Override
-    public Void visitWhileStmt(Stmt.While stmt) {
-        while(isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body);
-        }
-        return null;
-    }
-
-    @Override
-    public Void visitBlockStmt(Stmt.Block stmt) {
-        executeBlock(stmt.statements, new Environment(environment));
-        return null;
-    }
-
-    @Override
     public Void visitVarStmt(Stmt.Var stmt) {
         Object value = unassigned;
         if(stmt.initializer != null) {
@@ -88,25 +97,27 @@ class Interpreter
     }
 
     @Override
-    public Void visitExpressionStmt(Stmt.Expression stmt) {
-//        Object exprVal =
-        evaluate(stmt.expression);
-
-        // should not print when running from file;
-//            String text = stringify(exprVal);
-//            if(exprVal instanceof String) text = "'" + text + "'";
-//            System.out.println(text);
+    public Void visitWhileStmt(Stmt.While stmt) {
+        while(isTruthy(evaluate(stmt.condition))) {
+            try {
+                execute(stmt.body);
+            } catch(RuntimeError error) {
+                if(error.token.type == TokenType.BREAK) break;
+                if(error.token.type == TokenType.CONTINUE) continue;
+                throw error;
+            }
+        }
         return null;
     }
 
     // Expr.Visitor<Object>
 
     @Override
-    public Object visitTernaryExpr(Expr.Ternary expr) {
-        Object first = evaluate(expr.first);
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
 
-        if(isTruthy(first)) return evaluate(expr.second);
-        return evaluate(expr.third);
+        environment.assign(expr.name, value);
+        return value;
     }
 
     @Override
@@ -162,27 +173,13 @@ class Interpreter
     }
 
     @Override
-    public Object visitUnaryExpr(Expr.Unary expr) {
-        Object right = evaluate(expr.right);
-
-        switch(expr.operator.type) {
-            case BANG:
-                return !isTruthy(right);
-            case MINUS:
-                checkNumberOperand(expr.operator, right);
-                return -(double)right;
-        }
-
-        // Unreachable
-        return null;
+    public Object visitGroupingExpr(Expr.Grouping expr) {
+        return evaluate(expr.expression);
     }
 
     @Override
-    public Object visitAssignExpr(Expr.Assign expr) {
-        Object value = evaluate(expr.value);
-
-        environment.assign(expr.name, value);
-        return value;
+    public Object visitLiteralExpr(Expr.Literal expr) {
+        return expr.value;
     }
 
     @Override
@@ -199,8 +196,27 @@ class Interpreter
     }
 
     @Override
-    public Object visitGroupingExpr(Expr.Grouping expr) {
-        return evaluate(expr.expression);
+    public Object visitTernaryExpr(Expr.Ternary expr) {
+        Object first = evaluate(expr.first);
+
+        if(isTruthy(first)) return evaluate(expr.second);
+        return evaluate(expr.third);
+    }
+
+    @Override
+    public Object visitUnaryExpr(Expr.Unary expr) {
+        Object right = evaluate(expr.right);
+
+        switch(expr.operator.type) {
+            case BANG:
+                return !isTruthy(right);
+            case MINUS:
+                checkNumberOperand(expr.operator, right);
+                return -(double)right;
+        }
+
+        // Unreachable
+        return null;
     }
 
     @Override
@@ -210,11 +226,6 @@ class Interpreter
 
         throw new RuntimeError(expr.name,
         "Use of variable before assignment.");
-    }
-
-    @Override
-    public Object visitLiteralExpr(Expr.Literal expr) {
-        return expr.value;
     }
 
     private Boolean isTruthy(Object object) {
