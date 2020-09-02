@@ -4,23 +4,34 @@ declaration     -> varDecl
                  | statement ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement       -> exprStmt
+                 | forStmt
+                 | ifStmt
                  | printStmt
+                 | whileStmt
                  | block ;
-block           -> "{" declaration* "}" ;
 exprStmt        -> expression ";" ;
+forStmt         -> "for" "(" (varDecl | exprStmt | ";" )
+                             expression? ";"
+                             expression? ")" statement ;s
+ifStmt          -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStmt       -> "print" expression ";" ;
+whileStmt       -> "while" "(" expression ")" statement ;
+block           -> "{" declaration* "}" ;
 
 // expression      -> equality ; (before the addition of the comma operator)
 // expression      -> sequence ; (before the addition of the ternary operator)
 // expression      -> ternary ;  (before the addition of the asignment expression)
 
-expression      -> assignment ;
+expression      -> sequence ;
+sequence        -> assignment ( "," assignment )* ;
+
 assignment      -> IDENTIFIER "=" assignment
                  | ternary ;
 
-ternary         -> sequence ( "?" ternary ":" ternary )*
-sequence        -> equality ( "," equality )* ;
+ternary         -> logic_or ( "?" ternary ":" ternary )*
 
+logic_or        -> logic_and ( "or" logic_and )* ;
+logic_and       -> equality ( "and" equality )* ;
 equality        -> comparison ( ( "!=" | "==" ) comparison )* ;
 comparison      -> addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
 addition        -> multiplication ( ( "-" | "+" ) multiplication )* ;
