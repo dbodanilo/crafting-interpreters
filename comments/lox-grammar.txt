@@ -1,19 +1,24 @@
 // unambiguous
 program         -> declaration* EOF ;
-declaration     -> varDecl
+declaration     -> funDecl
+                 | varDecl
                  | statement ;
+funDecl         -> "fun" function ;
+function        -> IDENTIFIER "(" parameters? ")" block ;
+parameters      -> IDENTIFIER ( "," IDENTIFIER )* ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
+
 statement       -> exprStmt
+
                  | exitStmt
+
                  | forStmt
                  | ifStmt
                  | printStmt
                  | whileStmt
                  | block ;
-
-exitStmt       -> ( "break" | "continue" | "return" expression? ) ";" ;
-
 exprStmt        -> expression ";" ;
+exitStmt       -> ( "break" | "continue" | "return" expression? ) ";" ;
 forStmt         -> "for" "(" (varDecl | exprStmt | ";" )
                              expression? ";"
                              expression? ")" statement ;
@@ -45,8 +50,9 @@ addition        -> multiplication ( ( "-" | "+" ) multiplication )* ;
 //                  | unary ;
 
 multiplication  -> unary ( ( "/" | "*" ) unary )* ;
-unary           -> ( "!" | "-" ) unary
-                 | primary ;
+unary           -> ( "!" | "-" ) unary | call ;
+call            -> primary ( "(" arguments? ")" )*;
+arguments       -> assignment ( "," assignment )* ;
 primary         -> "true" | "false" | "nil"
                  | NUMBER | STRING
                  | "(" expression ")"
