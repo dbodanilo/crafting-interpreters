@@ -31,7 +31,12 @@ class Parser {
 
     private Stmt declaration() {
         try {
-            if(match(FUN)) return function("function");
+            if(match(FUN)) {
+                Stmt stmt = new Stmt.Expression(function("function"));
+                // handle fun() {};
+                match(SEMICOLON);
+                return stmt;
+            }
             if(match(VAR)) return varDeclaration();
 
             return statement();
@@ -41,9 +46,14 @@ class Parser {
         }
     }
 
-    private Stmt function(String kind) {
-        Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
-        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+//    private Stmt function(String kind) {
+    private Expr function(String kind) {
+        Token name = null;
+        if(check(IDENTIFIER)) {
+            name = advance();
+        }
+//                  consume(IDENTIFIER, "Expect " + kind + " name.");
+        consume(LEFT_PAREN, "Expect '(' after " + kind + " declaration.");
 
         List<Token> parameters = new ArrayList<>();
         if(!check(RIGHT_PAREN)) {
@@ -60,7 +70,7 @@ class Parser {
         consume(LEFT_BRACE, "Expect '{' before " + kind + "body.");
         List<Stmt> body = block();
 
-        return new Stmt.Function(name, parameters, body);
+        return new Expr.Function(name, parameters, body);
     }
 
     private Stmt varDeclaration() {
@@ -100,6 +110,7 @@ class Parser {
         }
 
         consume(SEMICOLON, "Expect ';' after return statement.");
+
         return new Stmt.Return(keyword, value);
     }
 
@@ -165,7 +176,9 @@ class Parser {
 
     private Stmt printStatement() {
         Expr value = expression();
+
         consume(SEMICOLON, "Expect ';' after value.");
+
         return new Stmt.Print(value);
     }
 
@@ -194,7 +207,9 @@ class Parser {
 
     private Stmt expressionStatement() {
         Expr expr = expression();
+
         consume(SEMICOLON, "Expect ';' after expression.");
+
         return new Stmt.Expression(expr);
     }
 
@@ -377,6 +392,10 @@ class Parser {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+
+        if(match(FUN)) {
+            return function("function");
         }
 
         // Binary operators used as unary
