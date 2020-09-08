@@ -3,17 +3,24 @@ package com.craftinginterpreters.lox;
 import java.util.List;
 
 class LoxFunction implements LoxCallable {
-    private final Stmt.Function declaration;
+    private final Expr.Function declaration;
     private final Environment closure;
+    private Token name;
 
-    LoxFunction(Stmt.Function declaration, Environment closure) {
+    LoxFunction(Token name, Expr.Function declaration, Environment closure) {
+        this.name = name;
         this.declaration = declaration;
         this.closure = closure;
     }
 
+    public void define(Token name) {
+        if(this.name == null) this.name = name;
+    }
+
     @Override
     public String toString() {
-        return "<fn " + declaration.name.lexeme + ">";
+        String name = this.name != null ? this.name.lexeme : "object";
+        return "<fn " + name + ">";
     }
 
     @Override
