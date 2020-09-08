@@ -92,13 +92,6 @@ class Interpreter
     }
 
     @Override
-    public Void visitFunctionStmt(Stmt.Function stmt) {
-        LoxFunction function = new LoxFunction(stmt, environment);
-        environment.define(stmt.name.lexeme, function);
-        return null;
-    }
-
-    @Override
     public Void visitIfStmt(Stmt.If stmt) {
         if(isTruthy(evaluate(stmt.condition))) {
             execute(stmt.thenBranch);
@@ -118,9 +111,14 @@ class Interpreter
 
     @Override
     public Void visitVarStmt(Stmt.Var stmt) {
+        Token name = stmt.name;
         Object value = unassigned;
         if(stmt.initializer != null) {
             value = evaluate(stmt.initializer);
+
+            if(value instanceof LoxFunction) {
+                ((LoxFunction)value).define(name);
+            }
         }
 
         environment.define(stmt.name.lexeme, value);
@@ -144,7 +142,12 @@ class Interpreter
 
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
+        Token name = expr.name;
         Object value = evaluate(expr.value);
+
+        if(value instanceof LoxFunction) {
+            ((LoxFunction)value).define(name);
+        }
 
         environment.assign(expr.name, value);
         return value;
@@ -225,6 +228,13 @@ class Interpreter
         }
 
         return function.call(this, arguments);
+    }
+
+    @Override
+    public Object visitFunctionExpr(Expr.Function expr) {
+        LoxFunction function = new LoxFunction(expr.name, expr, environment);
+        if(expr.name != null) environment.define(expr.name.lexeme, function);
+        return function;
     }
 
     @Override
