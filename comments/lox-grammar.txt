@@ -4,21 +4,19 @@ declaration     -> funDecl
                  | varDecl
                  | statement ;
 funDecl         -> "fun" function ;
-function        -> IDENTIFIER "(" parameters? ")" block ;
+function        -> IDENTIFIER? "(" parameters? ")" block ;
 parameters      -> IDENTIFIER ( "," IDENTIFIER )* ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
 
 statement       -> exprStmt
-
-                 | exitStmt
-
                  | forStmt
                  | ifStmt
                  | printStmt
+                 | returnStmt
                  | whileStmt
                  | block ;
 exprStmt        -> expression ";" ;
-exitStmt       -> ( "break" | "continue" | "return" expression? ) ";" ;
+returnStmt      -> ( "break" | "continue" | "return" expression? ) ";" ;
 forStmt         -> "for" "(" (varDecl | exprStmt | ";" )
                              expression? ";"
                              expression? ")" statement ;
@@ -37,7 +35,7 @@ sequence        -> assignment ( "," assignment )* ;
 assignment      -> IDENTIFIER "=" assignment
                  | ternary ;
 
-ternary         -> logic_or ( "?" ternary ":" ternary )*
+ternary         -> logic_or ( "?" ternary ":" ternary )* ;
 
 logic_or        -> logic_and ( "or" logic_and )* ;
 logic_and       -> equality ( "and" equality )* ;
@@ -56,7 +54,8 @@ arguments       -> assignment ( "," assignment )* ;
 primary         -> "true" | "false" | "nil"
                  | NUMBER | STRING
                  | "(" expression ")"
-                 | IDENTIFIER ;
+                 | IDENTIFIER
+                 | funDecl ;
 
 // ambiguous
 expression -> literal
