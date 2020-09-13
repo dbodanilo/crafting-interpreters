@@ -57,6 +57,7 @@ public class Environment {
         Environment environment = this;
         for(int i = 0; i < distance; ++i) {
             if(environment != null) environment = environment.enclosing;
+            else break;
         }
 
         return environment;
