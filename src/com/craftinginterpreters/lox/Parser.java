@@ -11,7 +11,9 @@ class Parser {
 
     private final List<Token> tokens;
     private int current = 0;
-    private int loopDepth = 0;
+
+    // before Resolver.
+//    private int loopDepth = 0;
 
     Parser(List<Token> tokens) {
         this.tokens = tokens;
@@ -87,15 +89,11 @@ class Parser {
     }
 
     private Stmt statement() {
-        if(match(BREAK, CONTINUE)) {
-            if(loopDepth > 0) return returnStatement();
-            else throw error(previous(), "loop exit statement outside loop construct.");
-        }
+        if(match(BREAK, CONTINUE, RETURN)) return returnStatement();
 
         if(match(FOR)) return forStatement();
         if(match(IF)) return ifStatement();
         if(match(PRINT)) return printStatement();
-        if(match(RETURN)) return returnStatement();
         if(match(WHILE)) return whileStatement();
         if(match(LEFT_BRACE)) return new Stmt.Block(block());
 
@@ -138,9 +136,7 @@ class Parser {
         }
         consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
-        ++loopDepth;
         Stmt body = statement();
-        --loopDepth;
 
         if(increment != null) {
             body = new Stmt.Block(Arrays.asList(
@@ -187,9 +183,7 @@ class Parser {
         Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after condition.");
 
-        ++loopDepth;
         Stmt body = statement();
-        --loopDepth;
 
         return new Stmt.While(condition, body);
     }
