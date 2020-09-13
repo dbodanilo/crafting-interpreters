@@ -289,7 +289,7 @@ class Interpreter
 //        Object val = environment.get(expr.name);
         Object val = lookUpVariable(expr.name, expr);
 
-        if(!val.equals(unassigned)) return val;
+        if(val == null || !val.equals(unassigned)) return val;
         throw new RuntimeError(expr.name,
             "Use of variable before assignment.");
     }

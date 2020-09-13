@@ -1,5 +1,7 @@
 package com.craftinginterpreters.lox;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,20 +52,20 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         scopes.pop();
     }
 
-    private void declare(Token name) {
+    private void declare(@NotNull Token name) {
         if(scopes.isEmpty()) return;
 
         Map<String, Boolean> scope = scopes.peek();
         if(scope.containsKey(name.lexeme)) {
             Lox.error(name,
-                "Variable with this name already declared in this scope.");
+        "Variable with this name already declared in this scope.");
         }
 
         // false: variable not initialized yet
         scope.put(name.lexeme, false);
     }
 
-    private void define(Token name) {
+    private void define(@NotNull Token name) {
         if(scopes.isEmpty()) return;
 
         // true: variable initialized
@@ -132,8 +134,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitFunctionExpr(Expr.Function expr) {
-        declare(expr.name);
-        define(expr.name);
+        if(expr.name != null) {
+            declare(expr.name);
+            define(expr.name);
+        }
 
         resolveFunction(expr, FunctionType.FUNCTION);
         return null;
