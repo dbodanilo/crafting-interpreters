@@ -1,9 +1,12 @@
 // unambiguous
 program         -> declaration* EOF ;
-declaration     -> funDecl
+declaration     -> classDecl
+                 | funDecl
                  | varDecl
                  | statement ;
+classDecl       -> "class" IDENTIFIER "{" function* "}" ;
 funDecl         -> "fun" function ;
+// "INDENTIFIER?" might cause trouble, as methods require an IDENTIFIER
 function        -> IDENTIFIER? "(" parameters? ")" block ;
 parameters      -> IDENTIFIER ( "," IDENTIFIER )* ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
@@ -32,7 +35,7 @@ block           -> "{" declaration* "}" ;
 expression      -> sequence ;
 sequence        -> assignment ( "," assignment )* ;
 
-assignment      -> IDENTIFIER "=" assignment
+assignment      -> ( call "." )? IDENTIFIER "=" assignment
                  | ternary ;
 
 ternary         -> logic_or ( "?" ternary ":" ternary )* ;
@@ -49,7 +52,8 @@ addition        -> multiplication ( ( "-" | "+" ) multiplication )* ;
 
 multiplication  -> unary ( ( "/" | "*" ) unary )* ;
 unary           -> ( "!" | "-" ) unary | call ;
-call            -> primary ( "(" arguments? ")" )*;
+// add support for "get expressions" (property access)
+call            -> primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 arguments       -> assignment ( "," assignment )* ;
 primary         -> "true" | "false" | "nil"
                  | NUMBER | STRING
