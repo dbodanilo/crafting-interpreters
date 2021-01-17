@@ -1,12 +1,1 @@
-var a = "global";
-{
-    fun showA() {
-        print a;
-        a = "function";
-    }
-
-    showA();
-    var a = "block";
-    showA();
-    showA();
-}
+super.notEvenInAClass();

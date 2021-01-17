@@ -4,7 +4,7 @@ declaration     -> classDecl
                  | funDecl
                  | varDecl
                  | statement ;
-classDecl       -> "class" IDENTIFIER "{" function* "}" ;
+classDecl       -> "class" IDENTIFIER ( "<" IDENTIFIER )? "{" function* "}" ;
 funDecl         -> "fun" function ;
 // "INDENTIFIER?" might cause trouble, as methods require an IDENTIFIER
 function        -> IDENTIFIER? "(" parameters? ")" block ;
@@ -55,10 +55,9 @@ unary           -> ( "!" | "-" ) unary | call ;
 // add support for "get expressions" (property access)
 call            -> primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 arguments       -> assignment ( "," assignment )* ;
-primary         -> "true" | "false" | "nil"
-                 | NUMBER | STRING
-                 | "(" expression ")"
-                 | IDENTIFIER
+primary         -> "true" | "false" | "nil" | "this"
+                 | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+                 | "super" "." IDENTIFIER ;
                  | funDecl ;
 
 // ambiguous

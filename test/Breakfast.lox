@@ -7,3 +7,5 @@ class Breakfast {
     print "Enjoy your breakfast, " + who + ".";
   }
 }
+
+Breakfast().serve("Danilo");
