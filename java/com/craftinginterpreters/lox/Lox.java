@@ -1,6 +1,6 @@
 package com.craftinginterpreters.lox;
 
-import com.sun.istack.internal.NotNull;
+//import com.sun.istack.internal.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -83,7 +83,7 @@ public class Lox {
         report(line, "", message);
     }
 
-    static void error(@NotNull Token token, String message) {
+    static void error(/* @NotNull */Token token, String message) {
         if(token.type == TokenType.EOF) {
             report(token.line, " at end", message);
         } else {
