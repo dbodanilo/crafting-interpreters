@@ -448,12 +448,7 @@ class Interpreter
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         while(isTruthy(evaluate(stmt.condition))) {
-            try {
-                execute(stmt.body);
-            } catch(Return returnStmt) {
-                if(returnStmt.keyword.type == TokenType.BREAK) break;
-                // continue unnecessary, as loop will go on from here.
-            }
+            execute(stmt.body);
         }
         return null;
     }
