@@ -83,7 +83,7 @@ class Parser {
         if(!check(RIGHT_PAREN)) {
             do {
                 if(parameters.size() >= 255) {
-                    error(peek(), "Cannot have more than 255 parameters.");
+                    error(peek(), "Can't have more than 255 parameters.");
                 }
 
                 parameters.add(consume(IDENTIFIER, "Expect parameter name."));
@@ -387,13 +387,13 @@ class Parser {
         if(!check(RIGHT_PAREN)) {
             do {
                 if(arguments.size() >= 255) {
-                    error(peek(), "Cannot have more than 255 arguments.");
+                    error(peek(), "Can't have more than 255 arguments.");
                 }
                 arguments.add(assignment());
             } while(match(COMMA));
         }
 
-        Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments");
+        Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
 
         return new Expr.Call(callee, paren, arguments);
     }
@@ -427,22 +427,22 @@ class Parser {
             return new Expr.Grouping(expr);
         }
 
-        if(match(FUN)) {
-            return function("function");
-        }
+        // if(match(FUN)) {
+        //     return function("function");
+        // }
 
-        // Binary operators used as unary
-        if(
-            match(SLASH, STAR,
-                MINUS, PLUS,
-                GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
-                BANG_EQUAL, EQUAL_EQUAL)
-        ) {
-            Token operator = previous();
-            if(expression() != null) {
-                throw error(operator, "Unary operation is not supported.");
-            }
-        }
+        // // Binary operators used as unary
+        // if(
+        //     match(SLASH, STAR,
+        //         MINUS, PLUS,
+        //         GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
+        //         BANG_EQUAL, EQUAL_EQUAL)
+        // ) {
+        //     Token operator = previous();
+        //     if(expression() != null) {
+        //         throw error(operator, "Unary operation is not supported.");
+        //     }
+        // }
 
         throw error(peek(), "Expect expression.");
     }
@@ -477,6 +477,7 @@ class Parser {
                 case PRINT:
                 case RETURN:
                     return;
+                default: break;
             }
 
             advance();

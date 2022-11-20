@@ -3,24 +3,36 @@ package com.craftinginterpreters.lox;
 import java.util.List;
 
 class LoxFunction implements LoxCallable {
-    private final Expr.Function declaration;
+    private Token name;
+    private final List<Token> params;
+    private final List<Stmt> body;
     private final Environment closure;
     private final Boolean isInitializer;
-    private Token name;
 
-    LoxFunction(Token name, Expr.Function declaration, Environment closure,
-                Boolean isInitializer) {
+    LoxFunction(Stmt.Function declaration, Environment closure,
+            boolean isInitializer) {
+        this(declaration.name, declaration.params, declaration.body, closure, isInitializer);
+    }
+
+    LoxFunction(Expr.Function declaration, Environment closure,
+            boolean isInitializer) {
+        this(declaration.name, declaration.params, declaration.body, closure, isInitializer);
+    }
+
+    LoxFunction(Token name, List<Token> params, List<Stmt> body, Environment closure,
+            boolean isInitializer) {
         this.isInitializer = isInitializer;
-        this.name = name;
-        this.declaration = declaration;
         this.closure = closure;
+        this.name = name;
+        this.params = params;
+        this.body = body;
     }
 
     LoxFunction bind(LoxInstance instance) {
         Environment environment = new Environment(closure);
         environment.define("this", instance);
-        return new LoxFunction(declaration.name, declaration, environment,
-                               isInitializer);
+        return new LoxFunction(name, params, body, environment,
+                                 isInitializer);
     }
 
     public void define(Token name) {
@@ -35,20 +47,20 @@ class LoxFunction implements LoxCallable {
 
     @Override
     public int arity() {
-        return declaration.params.size();
+        return params.size();
     }
 
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments) {
         Environment environment = new Environment(closure);
 
-        for(int i = 0; i < declaration.params.size(); ++i) {
-            environment.define(declaration.params.get(i).lexeme,
+        for(int i = 0; i < params.size(); ++i) {
+            environment.define(params.get(i).lexeme,
                 arguments.get(i));
         }
 
         try {
-            interpreter.executeBlock(declaration.body, environment);
+            interpreter.executeBlock(body, environment);
         } catch(Return returnValue) {
             if (isInitializer) return closure.getAt(0, "this");
 

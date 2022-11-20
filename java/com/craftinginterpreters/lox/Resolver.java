@@ -1,7 +1,5 @@
 package com.craftinginterpreters.lox;
 
-//import com.sun.istack.internal.NotNull;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,27 +53,27 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void beginScope() {
-        scopes.push(new HashMap<>());
+        scopes.push(new HashMap<String, Boolean>());
     }
 
     private void endScope() {
         scopes.pop();
     }
 
-    private void declare(/* @NotNull */Token name) {
+    private void declare(Token name) {
         if(scopes.isEmpty()) return;
 
         Map<String, Boolean> scope = scopes.peek();
         if(scope.containsKey(name.lexeme)) {
             Lox.error(name,
-        "Variable with this name already declared in this scope.");
+                "Already a variable with this name in this scope.");
         }
 
         // false: variable not initialized yet
         scope.put(name.lexeme, false);
     }
 
-    private void define(/* @NotNull */Token name) {
+    private void define(Token name) {
         if(scopes.isEmpty()) return;
 
         // true: variable initialized
@@ -93,12 +91,23 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         // Not found. Assume it is global.
     }
 
+    private void resolveFunction(Stmt.Function function, FunctionType type) {
+        resolveFunction(function.params, function.body, type);
+    }
+
     private void resolveFunction(Expr.Function function, FunctionType type) {
+        resolveFunction(function.params, function.body, type);
+    }
+
+    private void resolveFunction(
+            List<Token> functionParams, 
+            List<Stmt> functionBody, 
+            FunctionType type) {
         FunctionType enclosingFunction = currentFunction;
         currentFunction = type;
 
         beginScope();
-        for(Token param : function.params) {
+        for(Token param : functionParams) {
             declare(param);
             define(param);
         }
@@ -106,7 +115,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         // avoids while(...) { fun f(){ break; } }
         boolean enclosingLoop = inLoop;
         inLoop = false;
-        resolve(function.body);
+        resolve(functionBody);
 //        hasReturned = false;
         inLoop = enclosingLoop;
 
@@ -230,7 +239,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         if(!scopes.isEmpty() &&
            scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) {
             Lox.error(expr.name,
-                "Cannot read local variable in its own initializer.");
+                "Can't read local variable in its own initializer.");
         }
 
         resolveLocal(expr, expr.name);
@@ -295,6 +304,15 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        declare(stmt.name);
+        define(stmt.name);
+
+        resolveFunction(stmt, FunctionType.FUNCTION);
+        return null;
+    }
+
+    @Override
     public Void visitIfStmt(Stmt.If stmt) {
         resolve(stmt.condition);
         resolve(stmt.thenBranch);
@@ -313,7 +331,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         TokenType type = stmt.keyword.type;
         if(type == TokenType.RETURN) {
             if(currentFunction == FunctionType.NONE) {
-                Lox.error(stmt.keyword, "Cannot return from top-level code.");
+                Lox.error(stmt.keyword, "Can't return from top-level code.");
             }
 //            else hasReturned = true;
         }
@@ -321,7 +339,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
                   type == TokenType.CONTINUE) &&
                   !inLoop) {
             String typeName = type == TokenType.BREAK ? "break" : "continue";
-            Lox.error(stmt.keyword, "Cannot " + typeName + " from non-loop code.");
+            Lox.error(stmt.keyword, "Can't " + typeName + " from non-loop code.");
         }
 
         if (stmt.value != null) {

@@ -198,6 +198,7 @@ class Interpreter
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
                 return (double)left * (double)right;
+            default: break;
         }
 
         // Unreachable
@@ -222,7 +223,7 @@ class Interpreter
 
         if(arguments.size() != function.arity()) {
             throw new RuntimeError(expr.paren, "Expected " +
-                function.arity() + " arguments, but got " +
+                function.arity() + " arguments but got " +
                     arguments.size() + ".");
         }
 
@@ -231,7 +232,7 @@ class Interpreter
 
     @Override
     public Object visitFunctionExpr(Expr.Function expr) {
-        LoxFunction function = new LoxFunction(expr.name, expr, environment,
+        LoxFunction function = new LoxFunction(expr, environment,
                                       false);
         if(expr.name != null) environment.define(expr.name.lexeme, function);
         return function;
@@ -327,6 +328,7 @@ class Interpreter
             case MINUS:
                 checkNumberOperand(expr.operator, right);
                 return -(double)right;
+            default: break;
         }
 
         // Unreachable
@@ -339,9 +341,10 @@ class Interpreter
 //        Object val = environment.get(expr.name);
         Object val = lookUpVariable(expr.name, expr);
 
-        if(val == null || !val.equals(unassigned)) return val;
-        throw new RuntimeError(expr.name,
-            "Use of variable before assignment.");
+        if(unassigned.equals(val)) return null;
+        return val;
+        // throw new RuntimeError(expr.name,
+        //     "Use of variable before assignment.");
     }
 
     // Stmt.Visitor<Void>
@@ -373,7 +376,7 @@ class Interpreter
         Map<String, LoxFunction> methods = new HashMap<>();
         for (Expr.Function method : stmt.methods) {
             LoxFunction function =
-                    new LoxFunction(method.name, method,
+                    new LoxFunction(method,
                                     environment,
                                     method.name.lexeme.equals("init"));
             methods.put(method.name.lexeme, function);
@@ -408,6 +411,14 @@ class Interpreter
 //            String text = stringify(exprVal);
 //            if(exprVal instanceof String) text = "'" + text + "'";
 //            System.out.println(text);
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        LoxFunction function = new LoxFunction(stmt, environment,
+                false);
+        environment.define(stmt.name.lexeme, function);
         return null;
     }
 
