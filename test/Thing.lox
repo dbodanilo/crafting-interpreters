@@ -9,4 +9,4 @@ class Thing {
 }
 
 var callback = Thing().getCallback();
-callback();
+callback(); // expect: Thing instance

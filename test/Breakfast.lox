@@ -8,4 +8,4 @@ class Breakfast {
   }
 }
 
-Breakfast().serve("Danilo");
+Breakfast().serve("Danilo"); // expect: Enjoy your breakfast, Danilo.

@@ -1,19 +1,19 @@
 class A {
-  method() {
-    print "Method A";
-  }
+    method() {
+        print "A method";
+    }
 }
 
 class B < A {
-  method() {
-    print "Method B";
-  }
+    method() {
+        print "B method";
+    }
 
-  test() {
-    super.method();
-  }
+    test() {
+        super.method();
+    }
 }
 
 class C < B {}
 
-C().test();
+C().test(); // expect: A method

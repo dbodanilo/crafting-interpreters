@@ -6,17 +6,17 @@ var c = "global c";
   var b = "outer b";
   {
     var a = "inner a";
-    print a;
-    print "test: ";
+    print a; // expect: inner a
+    print "test: "; // expect: test: 
     var d;
-    a = d ? d : a;
-    print b;
-    print c;
+    // a = d ? d : a;
+    print b; // expect: outer b
+    print c; // expect: global c
   }
-  print a;
-  print b;
-  print c;
+  print a; // expect: outer a
+  print b; // expect: outer b
+  print c; // expect: global c
 }
-print a;
-print b;
-print c;
+print a; // expect: global a
+print b; // expect: global b
+print c; // expect: global c

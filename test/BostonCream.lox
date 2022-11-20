@@ -13,4 +13,5 @@ class BostonCream < Doughnut {
   }
 }
 
-BostonCream().cook();
+BostonCream().cook(); // expect: Fry until golden brown.
+// expect: Pipe full of custard and coat with chocolate.

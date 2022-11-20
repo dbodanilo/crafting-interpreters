@@ -1,8 +1,8 @@
 class Eclair {
   cook() {
-    /* super.cook(); */
+    // super.cook();
     print "Pipe full of crème pâtissière.";
   }
 }
 
-Eclair().cook();
+Eclair().cook(); // expect: Pipe full of crème pâtissière.
